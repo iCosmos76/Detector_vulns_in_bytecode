@@ -13,7 +13,7 @@
 
 ## Графический интерфейс
 
-![image](https://github.com/iCosmos76/Detector_vulns_in_bytecode/assets/32038807/f0173c31-7588-4ad3-8fbb-410156b81f28)
+![image](https://github.com/iCosmos76/Detector_vulns_in_bytecode/assets/32038807/23f80876-e38e-43c9-a7d1-dfdb5069f359)
 
 - Поле ввода: для ввода образца программного кода.
 - Кнопка "Предсказать": для запуска предсказания.
