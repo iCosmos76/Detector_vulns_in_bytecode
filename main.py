@@ -15,7 +15,7 @@ def split_text_into_chars(text, char_size):
         chars.append(text[i:i + char_size])
     return " ".join(chars) 
 
-loading_working_dir = '/home/Kompot/MAG_DISS/Results_25_04_Virt_mach/callbacks_bidirectional_post_training'
+loading_working_dir = './'
 ckpt_filepath = os.path.join(loading_working_dir, 'ckpt')
 modelT = tf.keras.models.load_model(filepath=ckpt_filepath)
 
