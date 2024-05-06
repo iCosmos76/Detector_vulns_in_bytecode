@@ -19,6 +19,15 @@ loading_working_dir = './'
 ckpt_filepath = os.path.join(loading_working_dir, 'ckpt')
 modelT = tf.keras.models.load_model(filepath=ckpt_filepath)
 
+start_pred = "6080"
+handled_start_pred = split_text_into_chars(start_pred, 2)
+handled_start_pred = np.expand_dims(start_pred, axis=0)
+start_pred = tf.data.Dataset.from_tensors(handled_start_pred)
+
+modelT_preds_probs = modelT.predict(start_pred)
+
+labels = {}
+
 def predict_sample():
     sample_1 = sample_entry.get()
     
@@ -29,13 +38,6 @@ def predict_sample():
     if not re.match(r'^0x[0-9a-fA-F]+$', sample_1):
         messagebox.showerror("Ошибка", "Неверный формат данных. Пожалуйста, введите данные в формате '0x...' и содержащие только символы '0123456789abcdef'.")
         return
-
-    start_pred = "6080"
-    handled_start_pred = split_text_into_chars(start_pred, 2)
-    handled_start_pred = np.expand_dims(start_pred, axis=0)
-    start_pred = tf.data.Dataset.from_tensors(handled_start_pred)
-
-    modelT_preds_probs = modelT.predict(start_pred)
 
     sample_1 = sample_1.replace("0x73", "0x60")
     sample_1 = sample_1[2:]
@@ -52,13 +54,20 @@ def predict_sample():
 
     vulnerabilities_count = 0
     vulnerabilities_text = ""
+    
+    for label in labels.values():
+        label.destroy()
+
+    for class_name in class_names:
+        labels[class_name] = tk.Label(root, text=class_name, font=("Arial", 12))
+        labels[class_name].pack()
 
     for class_name, probability in zip(class_names, modelT_preds_probs):
-        if round(float(probability[0][0]), 4) > 0.5:  # Указать пороговое значение для обнаружения уязвимостей
+        if round(float(probability[0][0]), 4) > 0.5:
             vulnerabilities_count += 1
-            vulnerabilities_text += f"\n**{class_name}: {round(float(probability[0][0]), 4)}**"
+            labels[class_name].config(text=f"{class_name}: {round(float(probability[0][0]), 4)}", fg="red")
         else:
-            vulnerabilities_text += f"\n{class_name}: {round(float(probability[0][0]), 4)}"
+            labels[class_name].config(text=f"{class_name}: {round(float(probability[0][0]), 4)}", fg="green")
 
     if vulnerabilities_count > 0:
         if vulnerabilities_count == 1:
@@ -68,12 +77,24 @@ def predict_sample():
     else:
         messagebox.showinfo("Уязвимости не обнаружены", "Уязвимости не были найдены.")
     result_label.config(text=f"Прогнозы по классам:{vulnerabilities_text}")
+
+    global time_label
+
+    if time_label.winfo_manager() == 'pack':
+        time_label.destroy()
+        time_label = tk.Label(root, text="", font=("Arial", 12))
+        time_label.pack()
+    else:
+        time_label.config(text=f"Время предсказания: {round(prediction_time, 2)} секунд")
+    
+    time_label.pack()
     time_label.config(text=f"Время предсказания: {round(prediction_time, 2)} секунд")
+
 
 def clear_input():
     sample_entry.delete(0, tk.END)
     result_label.config(text="")
-    time_label.config(text="")
+    time_label.destroy()
     length_label.config(text="Длина байт-кода: 0")
 
 def on_text_changed(event):
@@ -90,14 +111,14 @@ def on_paste(event):
 
 # Tkinter GUI
 root = tk.Tk()
-root.title("Предсказание класса")
+root.title("Детектор уязвимостей")
 
 # Set window size
 root.geometry("400x300")
 root.minsize(400, 300)
 
 # Input
-sample_label = tk.Label(root, text="Введите образец:", font=("Arial", 12))
+sample_label = tk.Label(root, text="Введите байт-код:", font=("Arial", 12))
 sample_label.pack()
 sample_entry = tk.Entry(root, width=50, font=("Arial", 12))
 sample_entry.pack(pady=10)
@@ -129,6 +150,6 @@ result_label.pack()
 
 # Time
 time_label = tk.Label(root, text="", font=("Arial", 12))
-time_label.pack()
 
 root.mainloop()
+
