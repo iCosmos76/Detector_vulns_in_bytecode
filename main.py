@@ -92,7 +92,9 @@ def predict_sample():
 def clear_input():
     sample_entry.delete(0, tk.END)
     result_label.config(text="")
-    time_label.destroy()
+    time_label.config(text="")
+    for label in labels.values():
+        label.config(text="")
     length_label.config(text="Длина байт-кода: 0")
 
 def on_text_changed(event):
