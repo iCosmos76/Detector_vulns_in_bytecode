@@ -31,6 +31,11 @@ labels = {}
 def predict_sample():
     sample_1 = sample_entry.get()
     
+    global time_label
+
+    if time_label.winfo_manager() == 'pack':
+        time_label.destroy()
+
     if not sample_1:
         messagebox.showerror("Ошибка", "Поле ввода не может быть пустым.")
         return
@@ -78,15 +83,8 @@ def predict_sample():
         messagebox.showinfo("Уязвимости не обнаружены", "Уязвимости не были найдены.")
     result_label.config(text=f"Прогнозы по классам:{vulnerabilities_text}")
 
-    global time_label
-
-    if time_label.winfo_manager() == 'pack':
-        time_label.destroy()
-        time_label = tk.Label(root, text="", font=("Arial", 12))
-        time_label.pack()
-    else:
-        time_label.config(text=f"Время предсказания: {round(prediction_time, 2)} секунд")
     
+    time_label = tk.Label(root, text="", font=("Arial", 12))
     time_label.pack()
     time_label.config(text=f"Время предсказания: {round(prediction_time, 2)} секунд")
 
